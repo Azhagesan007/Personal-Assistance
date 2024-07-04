@@ -1,0 +1,87 @@
+import os
+
+import openai
+import speech_recognition as sr
+import pyttsx3
+import pyjokes
+
+engine = pyttsx3.init("sapi5")
+voices = engine.getProperty("voices")
+engine.setProperty("voice", voices[1].id)
+engine.setProperty("rate", 150)
+
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
+
+def command():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        speak("How can i help you?")
+        audio = r.listen(source)
+        try:
+            query = r.recognize_google(audio)
+            print(f"master:{query}")
+            print(query)
+            return query
+        except:
+            speak("Try Again")
+            return "Try Again"
+
+
+r = sr.Recognizer()
+with sr.Microphone() as source:
+    speak("How can i help you?")
+    audio = r.listen(source)
+
+    query = r.recognize_google(audio)
+    print(query)
+start = False
+speak("Hi,I am your personal assistant")
+while start:
+    #openai.api_key = os.getenv("OPENAI_API_KEY")
+    user = command()
+    joke = user.split()
+    print(joke)
+
+    if user == "stop" or "stop" in joke:
+        start = False
+        speak("stopped. Turning off")
+        print("stopped")
+
+    elif "give" in joke and "me" in joke and "some" in joke and "time" in joke:
+        print("ok")
+        speak("ok")
+        x = 0
+        for i in range(1000000000):
+            x += 1
+        print("time is up")
+        speak("time is up")
+    else:
+
+        if user == "Try Again":
+            continue
+
+        elif "joke" in joke or "jokes" in joke or "fun" in joke:
+            x = pyjokes.get_joke()
+            speak(x)
+            print(x)
+        else:
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            response = openai.Completion.create(
+                model="text-davinci-003",
+                prompt=user,
+                temperature=0.7,
+                max_tokens=2914,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0
+           )
+            # speak("answer")
+            speak(response["choices"][0]["text"])
+            print(response["choices"][0]["text"])
+    next = command()
+    if next == "exit":
+        start = False
